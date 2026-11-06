@@ -20,18 +20,13 @@ Ein leichtgewichtiges, NVIDIA-ShadowPlay-inspiriertes Overlay für **OBS Studio 
 
 Öffne auf der GitHub-Projektseite den Bereich **Releases** und lade für die jeweilige Version beide Dateien herunter:
 
-| Release-Datei | Inhalt |
-|---|---|
-| `OBS-Shadowplay-Overlay-vX.Y.Z.rar` | Das Overlay: Python-Einstiegsdatei, Module, Konfiguration und Dokumentation. |
-| `python-3.6.8-embed-amd64.rar` | Die für dieses Paket vorbereitete 64-Bit-Python-Laufzeit inklusive Tkinter sowie Tcl/Tk. |
-
-Die beiden Archive sind **separate Release-Dateien**. Das Python-Archiv muss zuerst entpackt werden. OBS kann keine RAR-Datei direkt als Python-Installation verwenden.
+Die beiden Archive sind **eine Release-Dateien**. Das OBS-Overlay.rar muss zuerst entpackt werden. OBS kann keine RAR-Datei direkt als Python-Installation verwenden. Dannach in der Rar noch die python-3.6.8-embed-amd64.rar.
 
 ## Installation unter Windows
 
 ### 1. Beide Archive herunterladen und entpacken
 
-1. Lade die beiden oben genannten RAR-Dateien aus demselben GitHub-Release herunter.
+1. Lade die oben genannten RAR-Dateie aus demselben GitHub-Release herunter.
 2. Entpacke `OBS-Shadowplay-Overlay-vX.Y.Z.rar` in einen dauerhaften Ordner, zum Beispiel:
    `C:\OBS-Shadowplay-Overlay\`
 3. Entpacke `python-3.6.8-embed-amd64.rar` ebenfalls in einen dauerhaften Ordner, zum Beispiel:
