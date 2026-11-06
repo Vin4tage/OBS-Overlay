@@ -1,59 +1,122 @@
 # OBS ShadowPlay-Style Overlay
 
-**DE** · Ein Overlay im Stil von NVIDIA ShadowPlay – als reines **OBS-Python-Skript** (Tkinter, keine eigene Anwendung, keine Plugins, keine Injection in Spiele).
-**EN** · A NVIDIA-ShadowPlay-style overlay delivered purely as an **OBS Python script** (Tkinter, no standalone app, no plugins, no game injection).
+Ein leichtgewichtiges, NVIDIA-ShadowPlay-inspiriertes Overlay für **OBS Studio unter Windows**. Das Projekt wird als Python-Skript direkt in OBS geladen und nutzt OBS für Replay Buffer und Aufnahme.
 
-> **Unabhängiges Community-Projekt. / Independent community project.**
-> Keine offizielle NVIDIA- oder OBS-Software und nicht mit NVIDIA oder dem OBS Project verbunden. „NVIDIA“ und „ShadowPlay“ sind Marken der NVIDIA Corporation; „OBS“ gehört dem OBS Project. Es werden keine Logos oder Assets dieser Firmen verwendet.
-> Not affiliated with or endorsed by NVIDIA or the OBS Project. All trademarks belong to their owners.
+> **Unabhängiges Community-Projekt:** Dieses Projekt ist weder von NVIDIA noch vom OBS Project entwickelt, unterstützt oder offiziell mit ihnen verbunden. „NVIDIA“, „ShadowPlay“ und „OBS“ sind Marken ihrer jeweiligen Rechteinhaber. Das Overlay verwendet keine offiziellen NVIDIA- oder OBS-Logos.
 
-## Funktionen / Features
-- **Alt + Z** öffnet/schließt das Overlay, **Esc** schließt es (OBS-Hotkey-API; Belegung in OBS änderbar). Das kompakte Menü startet oben mittig, ist frei verschiebbar und bleibt im Vordergrund.
-- **Replay Buffer:** aktivieren, deaktivieren, speichern (`obs_frontend_replay_buffer_save` – startet keine Aufnahme), Statusanzeige.
-- **Aufnahme:** starten, stoppen, Status und Aufnahmezeit (inkl. Pause).
-- **Kompakte Statussymbole unten rechts**, auch bei geschlossenem Overlay: Replay Buffer nur als Icon, Aufnahme als Aufnahme-Icon plus Laufzeit; klickdurchlässig.
-- **Aktions-Popups oben rechts** für drei Sekunden, z. B. „Aufnahme gestartet“, „Replay Buffer deaktiviert“ oder „Clip gespeichert“. Sie erscheinen auch bei Aktionen über OBS-Hotkeys.
-- Zustand kommt aus **OBS-Ereignissen** (nicht aus Button-Klicks); ein günstiger Abgleich einmal pro Sekunde fängt verpasste Ereignisse ab.
-- Entprellung gegen Mehrfachklicks, keine doppelten Fenster/Hotkeys, sauberes Beenden bei OBS-Exit.
-- OBS-Frontend-Aktionen werden über einen eigenen Befehls-Worker ausgelöst; der OBS-Timer verarbeitet nur Statusabgleich und Logs.
-- Nur Python-Standardbibliothek (`tkinter`, `ctypes`) – keine Zusatzpakete. Deutsch/Englisch.
+## Features
 
-## Schnellstart / Quick start
-1. Python **mit Tkinter** bereitstellen: `scripts\install_python.ps1` (oder eigenes Python 3.12 64-bit, „tcl/tk“ aktiv).
-2. OBS → *Werkzeuge/Tools → Skripte/Scripts → Python-Einstellungen*: Python-Ordner eintragen.
-3. *Skripte → „+“* → **`obs_shadowplay_overlay.py`** wählen. Fertig – startet ab jetzt mit OBS.
+- **Overlay ein-/ausblenden:** `Alt + Z` öffnet und schließt das Menü. Die Tastenkombination kann in den OBS-Hotkeys geändert werden. `Esc` schließt das geöffnete Menü.
+- **Menü im ShadowPlay-Stil:** Kompakte Leiste oben mittig mit drei Aktionen: Replay Buffer, Clip speichern und Aufnahme.
+- **Replay Buffer:** Buffer direkt über OBS aktivieren oder deaktivieren und den aktuellen Replay-Clip speichern.
+- **Aufnahme:** OBS-Aufnahme starten und stoppen; der aktuelle Aufnahmestatus und die Laufzeit werden angezeigt.
+- **Kompakte Statussymbole:** Unten rechts wird der Replay-Status als Icon angezeigt. Während einer Aufnahme erscheinen das Aufnahme-Icon und die Laufzeit.
+- **Aktionsmeldungen:** Oben rechts erscheinen kurze Meldungen für ungefähr drei Sekunden, zum Beispiel „Aufnahme gestartet“ oder „Clip gespeichert“.
+- **OBS-Hotkeys werden berücksichtigt:** Die Statusanzeige und Aktionsmeldungen reagieren auch, wenn Aufnahme oder Replay Buffer über OBS-Hotkeys statt über das Overlay gesteuert werden.
+- **Verschiebbares Menü:** Das Hauptmenü kann verschoben werden; seine Position bleibt gespeichert.
+- **Keine zusätzlichen Python-Pakete:** Das Skript verwendet Python-Standardbibliotheken und die von OBS bereitgestellte `obspython`-API. Für die Oberfläche wird Tkinter benötigt.
 
-Ausführlich (Deutsch + English): [docs/INSTALLATION.md](docs/INSTALLATION.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) · [Requirements](docs/REQUIREMENTS.md)
+## Download
 
-**Wichtig / Important:** OBS liefert unter Windows kein Python mit, und das „embeddable“ Python enthält kein Tkinter. Eine externe, vollständige Python-Installation ist daher zwingend (kein Zusatzpaket nötig).
+Öffne auf der GitHub-Projektseite den Bereich **Releases** und lade für die jeweilige Version beide Dateien herunter:
 
-## Projektstruktur / Layout
-```
-obs_shadowplay_overlay.py      <- OBS-Einstiegsdatei (nur diese in OBS hinzufügen)
-shadowplay_overlay/            <- Module: core, obs_controller, overlay, status_indicators, hotkeys, config, gfx, utils
-config/default_config.json     <- Standardwerte (Überschreiben: config/user_config.json)
-docs/  scripts/  runtime/  releases/  tests/
-```
-Abweichung von der Vorgabe: Die Module liegen in einem Paket `shadowplay_overlay/` neben der Einstiegsdatei (statt `src/main.py`), damit Modulnamen wie `config`/`utils` nicht mit anderen OBS-Skripten kollidieren. Es gibt keine `assets/`-Ordner: Icons werden als Vektorgrafik gezeichnet, es sind keine Schriften/Bilder nötig (verwendet wird die Windows-Systemschrift „Segoe UI“).
-
-## Teststatus – ehrlich / Honest test status
-| Geprüft / Verified | Wie |
+| Release-Datei | Inhalt |
 |---|---|
-| Zustandslogik, Befehle, Entprellung, Worker-Dispatch, Fehlerfälle, Hotkey-Standardbelegung (Alt+Z), Übersetzungen und OBS-Aktionsmeldungen | `python tests/test_logic.py` (**simuliertes** `obspython`) |
-| Tk-Oberfläche, oberes Drei-Kachel-Menü, kompakte Statussymbole unten rechts, 3-Sekunden-Aktionsmeldungen, alle Button-Aktionen und Beenden ohne übrig gebliebene Threads | `tests/smoke_tk.py` unter Linux/Xvfb mit **simuliertem** OBS |
-| Hover + Klick | Soweit `libXtst` verfügbar ist: X11/XTest sendet echte X-Server-Mausbewegungen und Klicks über alle Buttons; andernfalls Tk-Ereignis-Fallback. Kein echter Windows-Mauszeiger/OBS-Test. |
-| **NICHT getestet** | Echtes OBS unter Windows; echter Replay-Speichervorgang und echte Aufnahme; Windows-Transparenz/Click-Through (`ctypes`); Fokus/Esc-Polling; Anzeige über Spielen; `install_python.ps1`; RAR-Erstellung. Der Code folgt der dokumentierten OBS-API, ist aber auf einem echten System noch zu verifizieren. |
+| `OBS-Shadowplay-Overlay-vX.Y.Z.rar` | Das Overlay: Python-Einstiegsdatei, Module, Konfiguration und Dokumentation. |
+| `python-3.6.8-embed-amd64.rar` | Die für dieses Paket vorbereitete 64-Bit-Python-Laufzeit inklusive Tkinter sowie Tcl/Tk. |
 
-Bitte Fehler als GitHub-Issue melden (OBS-Version, Python-Version, Auszug aus dem Skript-Protokoll).
+Die beiden Archive sind **separate Release-Dateien**. Das Python-Archiv muss zuerst entpackt werden. OBS kann keine RAR-Datei direkt als Python-Installation verwenden.
 
-## Bekannte Grenzen / Known limitations
-- Nur Windows. Kein Overlay über *exklusivem* Vollbild (Windows-Einschränkung; randlos/Fenster geht).
-- Hotkey Alt+Z wird nur beim ersten Laden vorbelegt; danach gilt, was in OBS gespeichert ist. OBS-Einstellung „Hotkey-Fokusverhalten“ kann Hotkeys deaktivieren.
-- Esc wird nur **solange das Overlay offen ist** per Tastenabfrage (Polling) erkannt, kein globaler Hook.
-- Die Aufnahmezeit läuft ab dem Moment, in dem das Skript die Aufnahme bemerkt (OBS liefert keine Startzeit).
-- Replay Buffer muss in den OBS-Ausgabeeinstellungen aktiviert sein.
+## Installation unter Windows
 
-## Entwicklung / Development
-`python tests/test_logic.py` · `SHADOWPLAY_ALLOW_NON_WINDOWS=1 xvfb-run -a python tests/smoke_tk.py` (Linux) · `python scripts/package_release.py`
+### 1. Beide Archive herunterladen und entpacken
 
-Lizenz / License: MIT – siehe [LICENSE](LICENSE). Version 1.0.3.
+1. Lade die beiden oben genannten RAR-Dateien aus demselben GitHub-Release herunter.
+2. Entpacke `OBS-Shadowplay-Overlay-vX.Y.Z.rar` in einen dauerhaften Ordner, zum Beispiel:
+   `C:\OBS-Shadowplay-Overlay\`
+3. Entpacke `python-3.6.8-embed-amd64.rar` ebenfalls in einen dauerhaften Ordner, zum Beispiel:
+   `C:\OBS-Python\python-3.6.8-embed-amd64\`
+4. Verschiebe die entpackten Ordner später nicht, ohne den Python-Pfad in OBS zu aktualisieren.
+
+### 2. Python in OBS auswählen
+
+1. Starte OBS Studio.
+2. Öffne **Werkzeuge → Skripte → Python-Einstellungen**.
+3. Wähle als Python-Pfad den **entpackten Ordner**, in dem `python.exe` liegt, zum Beispiel:
+   `C:\OBS-Python\python-3.6.8-embed-amd64\`
+4. Wähle **nicht** die RAR-Datei und auch nicht nur `python.exe` aus – benötigt wird der Ordner.
+5. Achte darauf, dass OBS und Python beide 64-Bit-Versionen sind.
+6. Falls OBS einen Neustart verlangt, starte OBS neu.
+
+Das mitgelieferte Python-Archiv ist für dieses Projekt vorbereitet und enthält unter anderem `python.exe`, `python36.dll`, `_tkinter.pyd`, den Ordner `tkinter` sowie die Tcl/Tk-Dateien. Eine normale Python-Embeddable-RAR ohne diese Tkinter-Dateien reicht nicht aus.
+
+> **Hinweis zur Python-Version:** Das beigefügte Python 3.6.8 ist eine ältere Laufzeit und sollte nur für diese OBS-Installation verwendet werden. OBS muss diese Python-Version in den Python-Einstellungen laden können. Wenn deine OBS-Version eine andere Python-Version verlangt, benötigst du eine dazu passende 64-Bit-Python-Installation mit Tkinter.
+
+### 3. Overlay-Skript hinzufügen
+
+1. Öffne in OBS **Werkzeuge → Skripte**.
+2. Wechsle zum Reiter **Skripte** und klicke auf **`+`**.
+3. Wähle die Datei `obs_shadowplay_overlay.py` aus dem entpackten Projektordner aus, zum Beispiel:
+   `C:\OBS-Shadowplay-Overlay\obs_shadowplay_overlay.py`
+4. Der Ordner `shadowplay_overlay` muss direkt neben `obs_shadowplay_overlay.py` liegen. Verschiebe oder lösche ihn nicht.
+5. Nach erfolgreichem Laden sollte die Skriptbeschreibung im OBS-Skriptfenster erscheinen.
+
+### 4. Replay Buffer einschalten
+
+Wenn du Replay-Clips speichern möchtest, aktiviere zuerst den **Replay Buffer** in den OBS-Ausgabeeinstellungen. Ohne aktivierten Replay Buffer kann das Overlay keinen Replay-Clip speichern.
+
+## Bedienung
+
+| Aktion | Bedienung |
+|---|---|
+| Overlay öffnen/schließen | `Alt + Z` |
+| Overlay schließen | `Esc` |
+| Menü verschieben | Titelleiste mit der Maus ziehen |
+| Replay Buffer aktivieren/deaktivieren | Replay-Buffer-Kachel im Overlay |
+| Replay-Clip speichern | Kachel „Clip speichern“ |
+| Aufnahme starten/stoppen | Aufnahme-Kachel |
+
+Die Hotkey-Belegung kann in **OBS → Einstellungen → Hotkeys** angepasst werden. OBS speichert die Belegung nach der ersten Einrichtung.
+
+## Projektstruktur
+
+```text
+OBS-Shadowplay-Overlay/
+├── obs_shadowplay_overlay.py   # Diese Datei in OBS hinzufügen
+├── shadowplay_overlay/         # Interne Overlay- und OBS-Module
+├── config/                     # Standardkonfiguration
+├── docs/                       # Installation, Anforderungen und Fehlerbehebung
+├── scripts/                    # Hilfs- und Entwicklungsskripte
+├── tests/                      # Automatisierte Tests
+├── releases/                   # Lokaler Ablageort für Release-Archive
+├── CHANGELOG.md
+├── LICENSE
+└── README.md
+```
+
+## Fehlerbehebung
+
+- **OBS zeigt „Python nicht konfiguriert“:** Prüfe den Ordner unter *Werkzeuge → Skripte → Python-Einstellungen*. Er muss der entpackte Ordner mit `python.exe` sein.
+- **Tkinter-Fehler:** Prüfe, ob `_tkinter.pyd`, `tkinter/`, `tcl/`, `tcl86t.dll` und `tk86t.dll` im Python-Ordner vorhanden sind. Verwende das für dieses Projekt bereitgestellte Runtime-Archiv.
+- **Replay Buffer nicht verfügbar:** Aktiviere den Replay Buffer in den OBS-Ausgabeeinstellungen.
+- **`Alt + Z` reagiert nicht:** Prüfe die Belegung unter *OBS → Einstellungen → Hotkeys*. Eine andere Anwendung kann dieselbe Kombination verwenden.
+- **Overlay erscheint nicht über einem Spiel:** Bei exklusivem Vollbild kann Windows zusätzliche Fenster unter Umständen nicht über dem Spiel darstellen. Verwende nach Möglichkeit randloses Fenster oder Fenstermodus.
+- **Weitere Informationen:** Siehe [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) und das OBS-Skript-Protokoll unter *Werkzeuge → Skripte → Skript-Protokoll*.
+
+## Entwicklung und Tests
+
+Das Projekt enthält Tests für die Zustandslogik und eine simulierte OBS-Umgebung:
+
+```powershell
+python tests/test_logic.py
+```
+
+Der Tk-Oberflächentest benötigt unter Linux eine grafische Testumgebung (Xvfb). Die automatisierten Tests ersetzen keinen Funktionstest mit der eigenen OBS-Installation unter Windows. Teste insbesondere Replay Buffer und Aufnahme zunächst mit kurzen Aufnahmen.
+
+## Version und Änderungsverlauf
+
+Aktuelle Projektversion: **1.0.3**. Details zu Änderungen stehen in [`CHANGELOG.md`](CHANGELOG.md).
+
+## Lizenz
+
+MIT – siehe [`LICENSE`](LICENSE).
