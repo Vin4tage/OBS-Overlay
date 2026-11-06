@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+runtime/python/
+config/user_config.json
+releases/*.zip
+releases/*.rar
+.vscode/
+.idea/
