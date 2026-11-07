@@ -34,3 +34,14 @@
 - Dauerhafte Statusanzeige unten rechts stark verkleinert: Replay Buffer nur als Icon, Aufnahme als Icon plus Laufzeit; beide Anzeigen nebeneinander und mit kleinem Bildschirmrand-Abstand.
 - Neue, klickdurchlässige Aktionsmeldungen oben rechts, die drei Sekunden angezeigt werden. Sie reagieren auf OBS-Ereignisse für Aufnahme/Replay (auch wenn die Aktionen über OBS-Hotkeys ausgelöst wurden), einschließlich Pause/Fortsetzen und Clip gespeichert.
 - Zusätzliche Übersetzungen und Tests für neue Layout-, Status- und Toast-Ereignisse.
+
+
+## 1.0.4 – 2026-11-07
+- Design-Überarbeitung bei unveränderter Logik und (fast) unveränderten Positionen.
+- Grüner Akzent durch weiße/neutrale Töne ersetzt: weiße Primär-Buttons, neutrale Graustufen, Rot (Aufnahme) und Gelb (Pause/Warnung) bleiben als Signalfarben.
+- Mehr Transparenz: Hauptmenü 88 %, Statusanzeigen 86 %, Meldungen 90 % Deckkraft (`config/user_config.json`: `overlay.opacity`, `status.opacity`, `toast.opacity`; 1.0 = undurchsichtig).
+- Aktive Kacheln werden sichtbar hervorgehoben (heller Rand/Icon bei Replay Buffer aktiv, roter Rand bei Aufnahme, gelber bei Pause); inaktive sind gedämpft.
+- Statusanzeigen unten rechts verkleinert (Höhe 36 → 24 px, Replay-Icon 26 px, Aufnahme 78 px) und näher an die Ecke (Rand 12 → 6 px, Abstand 6 → 4 px).
+- Kleinere, feinere Aktionsmeldung (336×48), feine Trennlinie unter dem Titel, Segoe UI Semibold für Überschriften/Buttons.
+- Neue Hilfsfunktion `gfx.recolor`; Icons werden nur bei Zustandsänderung umgefärbt (keine neuen Canvas-Elemente bei Hover).
+- Tests (18 Unit-Tests, Tk-Rauchtest mit echten X11-Mausereignissen) laufen weiterhin durch. Die Transparenz selbst ist unter Linux/Xvfb nicht sichtbar prüfbar (kein Compositor) und muss unter Windows angesehen werden.

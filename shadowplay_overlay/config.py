@@ -7,11 +7,11 @@ from . import utils
 
 DEFAULTS = {
     "language": "auto",
-    "overlay": {"opacity": 0.96, "default_position": "top_center"},
-    "status": {"margin_right": 12, "margin_bottom": 12, "gap": 6,
-               "opacity": 0.96, "use_work_area": False},
+    "overlay": {"opacity": 0.88, "default_position": "top_center"},
+    "status": {"margin_right": 6, "margin_bottom": 6, "gap": 4,
+               "opacity": 0.86, "use_work_area": False},
     "toast": {"duration_seconds": 3.0, "margin_top": 20,
-              "margin_right": 20, "opacity": 0.96},
+              "margin_right": 20, "opacity": 0.90},
     "timing": {"ui_poll_ms": 50, "obs_pump_ms": 100, "reconcile_ms": 1000,
                "command_debounce_ms": 700, "busy_timeout_ms": 3000,
                "ready_fallback_s": 6},

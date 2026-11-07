@@ -2,12 +2,12 @@
 import tkinter as tk
 
 from . import gfx, utils
-from .gfx import C, KEY, FONT
+from .gfx import C, KEY, FONT, FONT_SEMI
 
 
 class StatusBadge:
     """Kleine, klickdurchlässige Statusanzeige mit stabilen Canvas-Elementen."""
-    H = 36
+    H = 24
 
     def __init__(self, root, width, opacity, with_text=False):
         self.W = int(width)
@@ -25,10 +25,10 @@ class StatusBadge:
         self.visible = False
         self._sig = None
         self._bg_id = gfx.rrect(self.canvas, 1, 1, self.W - 1, self.H - 1,
-                                self.H // 2, fill=C["pill"], outline=C["border"], width=1)
+                                self.H // 2, fill=C["pill"], outline=C["border_hi"], width=1)
         self._text_id = self.canvas.create_text(
-            37, self.H // 2, text="", anchor="w", fill=C["text"],
-            font=(FONT, 9, "bold")) if with_text else None
+            25, self.H // 2, text="", anchor="w", fill=C["text"],
+            font=(FONT_SEMI, 8)) if with_text else None
         self._icon = ""
         self._icon_color = None
 
@@ -41,12 +41,12 @@ class StatusBadge:
             return
         self._sig = sig
         c = self.canvas
-        c.itemconfigure(self._bg_id, fill=fill, outline=color)
+        c.itemconfigure(self._bg_id, fill=fill)   # Rand bleibt dezent, die Farbe trägt das Icon
         if self._icon != icon or self._icon_color != color:
             c.delete("status_icon")
-            icon_x = self.W // 2 if not self.with_text else 18
+            icon_x = self.W // 2 if not self.with_text else 13
             gfx.draw_icon(c, icon, icon_x, self.H // 2,
-                          17 if self.with_text else 20, color, "status_icon")
+                          12 if self.with_text else 14, color, "status_icon")
             self._icon = icon
             self._icon_color = color
         if self._text_id is not None:
@@ -78,8 +78,8 @@ class StatusIndicators:
     def __init__(self, root, cfg, tr):
         self._cfg = cfg["status"]
         self._root = root
-        self.replay = StatusBadge(root, 38, self._cfg["opacity"], with_text=False)
-        self.rec = StatusBadge(root, 112, self._cfg["opacity"], with_text=True)
+        self.replay = StatusBadge(root, 26, self._cfg["opacity"], with_text=False)
+        self.rec = StatusBadge(root, 78, self._cfg["opacity"], with_text=True)
         self._last_layout = None
 
     def _place(self, replay_active, rec_active):
@@ -131,7 +131,7 @@ class StatusIndicators:
 
 class ActionToast:
     """Kurze, klickdurchlässige Bestätigung oben rechts (Standard: drei Sekunden)."""
-    W, H = 360, 54
+    W, H = 336, 48
 
     def __init__(self, root, cfg):
         toast_cfg = cfg.get("toast", {})
@@ -153,11 +153,11 @@ class ActionToast:
         self.canvas = tk.Canvas(self.win, width=self.W, height=self.H, bg=KEY,
                                 highlightthickness=0, bd=0)
         self.canvas.pack()
-        self._bg_id = gfx.rrect(self.canvas, 1, 1, self.W - 1, self.H - 1, 13,
-                                fill=C["panel"], outline=C["border"], width=1)
+        self._bg_id = gfx.rrect(self.canvas, 1, 1, self.W - 1, self.H - 1, 12,
+                                fill=C["panel"], outline=C["border_hi"], width=1)
         self._text_id = self.canvas.create_text(
-            56, self.H // 2, text="", anchor="w", width=self.W - 76,
-            fill=C["text"], font=(FONT, 10, "bold"))
+            52, self.H // 2, text="", anchor="w", width=self.W - 70,
+            fill=C["text"], font=(FONT_SEMI, 10))
         self._icon = ""
         self._position()
 
@@ -177,11 +177,13 @@ class ActionToast:
         sig = (text, icon, color)
         if sig != self._sig:
             self._sig = sig
-            self.canvas.itemconfigure(self._bg_id, outline=color)
+            # Erfolg = dezenter Rand; Warnung/Fehler behalten ihre Farbe am Rand.
+            self.canvas.itemconfigure(
+                self._bg_id, outline=C["border_hi"] if style == "success" else color)
             self.canvas.itemconfigure(self._text_id, text=text)
             if self._icon != icon:
                 self.canvas.delete("toast_icon")
-                gfx.draw_icon(self.canvas, icon, 28, self.H // 2, 22, color, "toast_icon")
+                gfx.draw_icon(self.canvas, icon, 26, self.H // 2, 20, color, "toast_icon")
                 self._icon = icon
         self._until = now + self._duration
         if not self.visible:

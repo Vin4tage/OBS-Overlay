@@ -10,7 +10,7 @@ import time
 import tkinter as tk
 
 from . import gfx, utils
-from .gfx import C, KEY, FONT
+from .gfx import C, KEY, FONT, FONT_SEMI
 from .status_indicators import ActionToast, StatusIndicators
 
 # Kompaktes, horizontal ausgerichtetes Menü im oberen Bildschirmbereich.
@@ -26,11 +26,11 @@ class RoundButton:
         self.on_click = on_click
         self.text, self.kind, self.enabled, self.hover = text, kind, True, False
         self._shape_id = gfx.rrect(
-            self.c, self.x, self.y, self.x + self.w, self.y + self.h, 10,
+            self.c, self.x, self.y, self.x + self.w, self.y + self.h, 9,
             fill=C["btn"])
         self._text_id = self.c.create_text(
             self.x + self.w / 2, self.y + self.h / 2, text=self.text,
-            fill=C["text"], font=(FONT, 9, "bold"))
+            fill=C["text"], font=(FONT_SEMI, 9))
         self._apply_style()
 
     def contains(self, x, y):
@@ -85,6 +85,7 @@ class MainOverlay:
         utils.tk_try(self.win, "-transparentcolor", KEY)
         self.win.configure(bg=KEY)
         self.win.bind("<Escape>", lambda _e: self.hide())
+        self._cards = {}
         self.cv = c = tk.Canvas(self.win, width=W, height=H, bg=KEY, highlightthickness=0, bd=0)
         c.pack()
         self._build(c)
@@ -92,19 +93,20 @@ class MainOverlay:
     # ------------------------------------------------------------------ Aufbau
     def _build(self, c):
         tr = self.tr
-        gfx.rrect(c, 2, 2, W - 2, H - 2, 18, fill=C["panel"], outline=C["border"], width=1)
+        gfx.rrect(c, 2, 2, W - 2, H - 2, 18, fill=C["panel"], outline=C["border_hi"], width=1)
 
         # Titel und Ziehbereich. Der Schließen-Button bleibt separat anklickbar.
         c.create_rectangle(18, 10, W - 62, 58, fill=C["panel"], outline=C["panel"], tags="drag")
         c.create_text(W / 2, 34, text=tr("title"), anchor="center", fill=C["text"],
-                      font=(FONT, 13, "bold"), tags="drag")
+                      font=(FONT_SEMI, 12), tags="drag")
+        c.create_line(26, 60, W - 26, 60, fill=C["hairline"])   # feine Trennlinie unter dem Titel
         for ev, fn in (("<ButtonPress-1>", self._drag_start), ("<B1-Motion>", self._drag_move),
                        ("<ButtonRelease-1>", self._drag_end)):
             c.tag_bind("drag", ev, fn)
 
         # Schließen-Knopf
         gfx.rrect(c, W - 52, 18, W - 20, 50, 8, fill=C["panel"], tags="xbtn")
-        gfx.draw_icon(c, "close", W - 36, 34, 18, C["muted"], "xbtn")
+        gfx.draw_icon(c, "close", W - 36, 34, 16, C["muted"], "xbtn")
         c.tag_bind("xbtn", "<Enter>", lambda _e: c.configure(cursor="hand2"))
         c.tag_bind("xbtn", "<Leave>", lambda _e: c.configure(cursor=""))
         c.tag_bind("xbtn", "<ButtonRelease-1>", lambda _e: self.hide())
@@ -132,17 +134,28 @@ class MainOverlay:
 
     def _card(self, c, x, icon, title, status_tag):
         y = CARD_Y
-        gfx.rrect(c, x, y, x + CARD_W, y + CARD_H, 13,
-                  fill=C["card"], outline=C["border"], width=1)
+        card = gfx.rrect(c, x, y, x + CARD_W, y + CARD_H, 13,
+                         fill=C["card"], outline=C["border"], width=1)
         c.create_text(x + CARD_W / 2, y + 21, text=title, anchor="center",
-                      fill=C["text"], font=(FONT, 10, "bold"))
-        c.create_oval(x + CARD_W / 2 - 22, y + 39,
-                      x + CARD_W / 2 + 22, y + 83,
-                      fill=C["panel"], outline=C["border"])
-        gfx.draw_icon(c, icon, x + CARD_W / 2, y + 61, 26, C["accent"], "ic_" + status_tag)
+                      fill=C["text"], font=(FONT_SEMI, 10))
+        ring = c.create_oval(x + CARD_W / 2 - 22, y + 39,
+                             x + CARD_W / 2 + 22, y + 83,
+                             fill=C["ring"], outline=C["border"])
+        gfx.draw_icon(c, icon, x + CARD_W / 2, y + 61, 24, C["muted"], "ic_" + status_tag)
         setattr(self, "t_" + status_tag, c.create_text(
             x + CARD_W / 2, y + 91, text="", anchor="center",
             fill=C["muted"], font=(FONT, 9)))
+        self._cards[status_tag] = (card, ring, None)
+
+    def _style_card(self, tag, border, icon_color):
+        """Aktive Kacheln bekommen einen hellen Rand und ein helles Icon (nur bei Änderung)."""
+        card, ring, last = self._cards[tag]
+        if last == (border, icon_color):
+            return
+        self.cv.itemconfigure(card, outline=border)
+        self.cv.itemconfigure(ring, outline=border)
+        gfx.recolor(self.cv, "ic_" + tag, icon_color)
+        self._cards[tag] = (card, ring, (border, icon_color))
 
     # --------------------------------------------------------- Maus / Buttons
     def _on_canvas_motion(self, event):
@@ -262,6 +275,11 @@ class MainOverlay:
         save_txt = tr("save_ready") if ready and snap["replay"] else tr("save_inactive")
         save_col = C["accent"] if ready and snap["replay"] else C["muted"]
         c.itemconfigure(self.t_st_save, text=save_txt, fill=save_col)
+        rep_on = bool(ready and snap["replay"])
+        self._style_card("st_rep", C["border_act"] if rep_on else C["border"],
+                         C["accent"] if rep_on else C["muted"])
+        self._style_card("st_save", C["border_hi"] if rep_on else C["border"],
+                         C["accent"] if rep_on else C["muted"])
 
         # Aufnahme
         elapsed = utils.fmt_time(snap["elapsed"])
@@ -274,6 +292,11 @@ class MainOverlay:
         else:
             rec_txt, rec_col = tr("rec_idle"), C["muted"]
         c.itemconfigure(self.t_st_rec, text=rec_txt, fill=rec_col)
+        if ready and snap["recording"]:
+            self._style_card("st_rec", C["warn"] if snap["paused"] else C["danger"],
+                             C["warn"] if snap["paused"] else C["danger"])
+        else:
+            self._style_card("st_rec", C["border"], C["muted"])
         self.btn_rec.configure(
             text=tr("btn_rec_stop") if snap["recording"] else tr("btn_rec_start"),
             kind="danger" if snap["recording"] else "primary",

@@ -1,16 +1,30 @@
 """Zeichenhelfer (Tk-Canvas, keine Bilddateien/Zusatzpakete nötig)."""
 import math
 
-KEY = "#010203"  # Farbschlüssel für transparente Bereiche (Windows: -transparentcolor)
+KEY = "#010203"  # Farbschlüssel für vollständig durchsichtige Bereiche (Windows: -transparentcolor)
 FONT = "Segoe UI"
+FONT_SEMI = "Segoe UI Semibold"   # fehlt die Schrift, nimmt Tk automatisch einen Ersatz
+# Neutrale, leicht kühle Graustufen mit weißem Akzent (statt Grün).
 C = {
-    "panel": "#17191c", "card": "#202327", "border": "#30353b",
-    "text": "#eceff1", "muted": "#8b929b",
-    "accent": "#76b900", "accent_hi": "#8ad600", "accent_dim": "#243300", "on_accent": "#0d1300",
-    "danger": "#e5484d", "danger_hi": "#f0666b", "warn": "#f5a524",
-    "btn": "#2c3137", "btn_hi": "#393f47", "off": "#24272b", "off_text": "#5d646d",
-    "pill": "#101214",
+    "panel": "#0f1114", "card": "#181a1e", "border": "#2a2d33", "border_hi": "#3d4148",
+    "border_act": "#d5d9df", "hairline": "#1f2226",
+    "text": "#f3f5f7", "muted": "#9399a3",
+    "accent": "#f2f4f7", "accent_hi": "#ffffff", "accent_dim": "#26292e", "on_accent": "#0f1114",
+    "danger": "#ff5a5f", "danger_hi": "#ff7a7e", "warn": "#f5b041",
+    "btn": "#23262b", "btn_hi": "#31353c", "off": "#1a1c20", "off_text": "#585d66",
+    "pill": "#0c0d0f", "ring": "#202328",
 }
+
+
+def recolor(c, tag, color):
+    """Färbt alle Elemente eines Icons um, ohne gefüllte/ungefüllte Teile zu verwechseln."""
+    for item in c.find_withtag(tag):
+        for opt in ("fill", "outline"):
+            try:
+                if c.itemcget(item, opt):
+                    c.itemconfigure(item, **{opt: color})
+            except Exception:
+                pass
 
 
 def rrect(c, x1, y1, x2, y2, r, **kw):
