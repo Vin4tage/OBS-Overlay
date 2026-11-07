@@ -61,8 +61,7 @@ A modern, Shadowplay-style Overlay for OBS Studio.
 ## Notes
 
 - If you encounter any issues, restart OBS and check the script console
-- The notification appears in the top-right corner by default
-- Tested on Windows 10
+- Tested on Windows 11
 
 ## Support
 
